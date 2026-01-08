@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 
 class ClinicQueue extends Component
 {
-    #[Layout('layouts.app')]
+    #[Layout('layouts.klinik')]
     public $search = '';
     public $complaint;
 

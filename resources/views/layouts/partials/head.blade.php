@@ -3,9 +3,10 @@
      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
  <meta name="robots" content="noindex, nofollow" />
 
- <title>Demo: Dashboard - Analytics | Materio - Bootstrap Dashboard FREE</title>
+ <title>SIKLINIK</title>
 
  <meta name="description" content="" />
+ <meta name="csrf-token" content="{{ csrf_token() }}">
 
  <!-- Favicon -->
  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
@@ -17,6 +18,7 @@
      rel="stylesheet" />
 
  <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/iconify-icons.css') }}" />
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
  <!-- Core CSS -->
  <!-- build:css assets/vendor/css/theme.css -->

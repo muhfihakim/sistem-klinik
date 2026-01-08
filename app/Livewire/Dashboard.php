@@ -6,7 +6,7 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-    #[Layout('layouts.app')]
+    #[Layout('layouts.klinik')]
     public function render()
     {
         return view('livewire.dashboard');

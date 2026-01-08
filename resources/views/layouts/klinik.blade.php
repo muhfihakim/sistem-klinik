@@ -1,12 +1,12 @@
 <!doctype html>
 
-<html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="../assets/"
+<html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="{{ asset('assets') }}"
     data-template="vertical-menu-template-free">
 
 <head>
     @include('layouts.partials.head')
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 
 <body>
@@ -33,12 +33,8 @@
                 <div class="content-wrapper">
                     <!-- Content -->
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        <div class="row gy-6">
-                            {{ $slot }}
-                            <!--/ Data Tables -->
-                        </div>
+                        {{ $slot }}
                     </div>
-                    <!-- / Content -->
 
                     <!-- Footer -->
                     @include('layouts.partials.footer')
@@ -56,7 +52,6 @@
     </div>
     <!-- / Layout wrapper -->
     <!-- Core JS -->
-
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/js/bootstrap.js') }}" data-navigate-once></script>

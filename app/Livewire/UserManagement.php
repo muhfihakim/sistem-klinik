@@ -3,27 +3,47 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
-use Illuminate\Support\Facades\Hash;
 
 class UserManagement extends Component
 {
     use WithPagination;
 
-    #[Layout('layouts.klinik')] // Pastikan ini layout template custom Anda
+    // protected string $paginationTheme = 'bootstrap';
 
-    public $name, $email, $password, $role, $userId;
-    public $isOpen = false; // Untuk kontrol modal (jika template pakai modal)
+    #[Layout('layouts.klinik')]
+    public $name = '', $email = '', $password = '', $role = '';
+    public $userId = null;
+
     public $search = '';
+    public $deleteId = null;
 
-    protected $rules = [
-        'name' => 'required|min:3',
-        'email' => 'required|email|unique:users,email',
-        'role' => 'required',
-        'password' => 'required|min:6',
-    ];
+    // Biar search reset pagination
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function rules()
+    {
+        return [
+            'name' => ['required', 'min:3'],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($this->userId),
+            ],
+            'role' => ['required', Rule::in(['admin', 'doctor', 'staff'])],
+            'password' => [
+                $this->userId ? 'nullable' : 'required',
+                'min:6',
+            ],
+        ];
+    }
 
     public function render()
     {
@@ -34,64 +54,93 @@ class UserManagement extends Component
         ]);
     }
 
+    private function resetInputFields()
+    {
+        $this->reset(['name', 'email', 'password', 'role', 'userId']);
+        $this->resetValidation();
+    }
+
     public function create()
     {
         $this->resetInputFields();
-        $this->openModal();
-    }
-
-    public function openModal()
-    {
-        $this->isOpen = true;
-    }
-    public function closeModal()
-    {
-        $this->isOpen = false;
-    }
-
-    private function resetInputFields()
-    {
-        $this->name = '';
-        $this->email = '';
-        $this->password = '';
-        $this->role = '';
-        $this->userId = '';
-    }
-
-    public function store()
-    {
-        $this->validate($this->userId ? [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $this->userId,
-            'role' => 'required',
-        ] : $this->rules);
-
-        User::updateOrCreate(['id' => $this->userId], [
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'password' => $this->password ? Hash::make($this->password) : User::find($this->userId)->password,
-        ]);
-
-        session()->flash('message', $this->userId ? 'User Diperbarui.' : 'User Dibuat.');
-        $this->closeModal();
-        $this->resetInputFields();
+        $this->dispatch('open-user-modal');
     }
 
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        $this->userId = $id;
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->role = $user->role;
-        $this->password = ''; // Kosongkan password saat edit
-        $this->openModal();
+
+        $this->userId = $user->id;
+        $this->name   = $user->name;
+        $this->email  = $user->email;
+        $this->role   = $user->role;
+        $this->password = ''; // kosongkan, biar tidak ketimpa
+
+        $this->resetValidation();
+        $this->dispatch('open-user-modal');
     }
 
-    public function delete($id)
+    public function store()
     {
-        User::find($id)->delete();
+        $this->validate();
+
+        if ($this->userId) {
+            $user = User::findOrFail($this->userId);
+
+            $data = [
+                'name'  => $this->name,
+                'email' => $this->email,
+                'role'  => $this->role,
+            ];
+
+            if (!empty($this->password)) {
+                $data['password'] = Hash::make($this->password);
+            }
+
+            $user->update($data);
+
+            session()->flash('message', 'User Diperbarui.');
+        } else {
+            User::create([
+                'name'     => $this->name,
+                'email'    => $this->email,
+                'role'     => $this->role,
+                'password' => Hash::make($this->password),
+            ]);
+
+            session()->flash('message', 'User Dibuat.');
+        }
+
+        $this->dispatch('close-user-modal');
+        $this->resetInputFields();
+    }
+
+    // === HAPUS VIA MODAL ===
+    public function confirmDelete($id)
+    {
+        $this->deleteId = $id;
+        $this->dispatch('open-delete-modal');
+    }
+
+    public function destroy()
+    {
+        if (!$this->deleteId) return;
+
+        // optional: cegah hapus akun sendiri
+        if (auth()->check() && auth()->id() == $this->deleteId) {
+            session()->flash('message', 'Tidak bisa menghapus akun yang sedang digunakan.');
+            $this->dispatch('close-delete-modal');
+            $this->deleteId = null;
+            return;
+        }
+
+        User::findOrFail($this->deleteId)->delete();
+
         session()->flash('message', 'User Berhasil Dihapus.');
+        $this->dispatch('close-delete-modal');
+        $this->deleteId = null;
+
+        // supaya tidak nyangkut di page kosong setelah delete
+        $this->resetPage();
     }
 }
