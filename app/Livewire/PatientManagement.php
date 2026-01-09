@@ -3,88 +3,162 @@
 namespace App\Livewire;
 
 use App\Models\Patient;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 class PatientManagement extends Component
 {
     use WithPagination;
-    protected $paginationTheme = 'bootstrap';
 
     #[Layout('layouts.klinik')]
+    protected string $paginationTheme = 'bootstrap';
 
-    public $search = '';
-    public $nik, $name, $gender, $birth_date, $address, $phone, $selected_id;
-    public $isEdit = false;
+    public string $search = '';
+
+    public ?int $patientId = null;   // pengganti selected_id
+    public ?int $deleteId  = null;   // khusus delete
+
+    public string $no_rm = '';       // kalau kolom ini memang ada & dipakai di form
+    public string $nik = '';
+    public string $name = '';
+    public string $gender = '';
+    public string $birth_date = '';
+    public string $address = '';
+    public string $phone = '';
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function rules()
+    {
+        return [
+            // kalau no_rm diisi otomatis dari sistem, kamu bisa jadikan nullable & remove dari form
+            'no_rm' => ['nullable', 'string', 'max:50'],
+
+            'nik' => [
+                'required',
+                'digits:16',
+                Rule::unique('patients', 'nik')->ignore($this->patientId),
+            ],
+            'name' => ['required', 'min:3'],
+            'gender' => ['required', Rule::in(['L', 'P'])],
+            'birth_date' => ['required', 'date'],
+            'address' => ['required'],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ];
+    }
+
+    private function resetInputFields(): void
+    {
+        $this->reset([
+            'patientId',
+            'deleteId',
+            'no_rm',
+            'nik',
+            'name',
+            'gender',
+            'birth_date',
+            'address',
+            'phone',
+        ]);
+
+        $this->resetValidation();
+    }
 
     public function render()
     {
-        $patients = Patient::where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('no_rm', 'like', '%' . $this->search . '%')
-            ->orWhere('nik', 'like', '%' . $this->search . '%')
-            ->latest()->paginate(10);
+        $patients = Patient::query()
+            ->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('no_rm', 'like', '%' . $this->search . '%')
+                    ->orWhere('nik', 'like', '%' . $this->search . '%');
+            })
+            ->latest()
+            ->paginate(10);
 
         return view('livewire.patient-management', compact('patients'));
     }
 
-    public function resetInput()
+    public function create()
     {
-        $this->reset(['nik', 'name', 'gender', 'birth_date', 'address', 'phone', 'selected_id', 'isEdit']);
+        $this->resetInputFields();
+        $this->dispatch('open-patient-modal');
+    }
+
+    public function edit(int $id)
+    {
+        $patient = Patient::findOrFail($id);
+
+        $this->patientId   = $patient->id;
+        $this->no_rm       = (string) ($patient->no_rm ?? '');
+        $this->nik         = (string) $patient->nik;
+        $this->name        = (string) $patient->name;
+        $this->gender      = (string) $patient->gender;
+        $this->birth_date  = (string) $patient->birth_date;
+        $this->address     = (string) $patient->address;
+        $this->phone       = (string) ($patient->phone ?? '');
+
+        $this->resetValidation();
+        $this->dispatch('open-patient-modal');
     }
 
     public function store()
     {
-        $this->validate([
-            'nik' => 'required|digits:16|unique:patients,nik,' . $this->selected_id,
-            'name' => 'required|min:3',
-            'gender' => 'required',
-            'birth_date' => 'required|date',
-            'address' => 'required',
-        ]);
+        $this->validate();
 
-        Patient::updateOrCreate(['id' => $this->selected_id], [
-            'nik' => $this->nik,
-            'name' => $this->name,
-            'gender' => $this->gender,
-            'birth_date' => $this->birth_date,
-            'address' => $this->address,
-            'phone' => $this->phone,
-        ]);
+        if ($this->patientId) {
+            $patient = Patient::findOrFail($this->patientId);
 
-        // Dispatch event untuk menutup modal via JS
-        $this->dispatch('closeModal', modalId: '#patientModal');
-        $this->resetInput();
+            $patient->update([
+                'no_rm'      => $this->no_rm,
+                'nik'        => $this->nik,
+                'name'       => $this->name,
+                'gender'     => $this->gender,
+                'birth_date' => $this->birth_date,
+                'address'    => $this->address,
+                'phone'      => $this->phone,
+            ]);
 
-        // Notifikasi Toast/Alert (Opsional)
-        $this->dispatch('swal', title: 'Berhasil!', text: 'Data pasien telah disimpan.', icon: 'success');
+            session()->flash('message', 'Data pasien berhasil diperbarui.');
+        } else {
+            Patient::create([
+                'no_rm'      => $this->no_rm,
+                'nik'        => $this->nik,
+                'name'       => $this->name,
+                'gender'     => $this->gender,
+                'birth_date' => $this->birth_date,
+                'address'    => $this->address,
+                'phone'      => $this->phone,
+            ]);
+
+            session()->flash('message', 'Data pasien berhasil ditambahkan.');
+        }
+
+        $this->dispatch('close-patient-modal');
+        $this->resetInputFields();
     }
 
-    public function edit($id)
+    public function confirmDelete(int $id)
     {
-        $patient = Patient::findOrFail($id);
-        $this->selected_id = $id;
-        $this->nik = $patient->nik;
-        $this->name = $patient->name;
-        $this->gender = $patient->gender;
-        $this->birth_date = $patient->birth_date;
-        $this->address = $patient->address;
-        $this->phone = $patient->phone;
-        $this->isEdit = true;
+        $this->deleteId = $id;
+        $this->dispatch('open-patient-delete-modal');
     }
 
-    // Fungsi untuk memicu konfirmasi hapus
-    public function confirmDelete($id)
+    public function destroy()
     {
-        $this->selected_id = $id;
-        $this->dispatch('openModal', modalId: '#deleteModal');
-    }
+        if (!$this->deleteId) return;
 
-    public function delete()
-    {
-        Patient::findOrFail($this->selected_id)->delete();
-        $this->dispatch('closeModal', modalId: '#deleteModal');
-        $this->resetInput();
-        $this->dispatch('swal', title: 'Dihapus!', text: 'Data pasien telah dihapus.', icon: 'warning');
+        Patient::findOrFail($this->deleteId)->delete();
+
+        session()->flash('message', 'Data pasien berhasil dihapus.');
+
+        $this->dispatch('close-patient-delete-modal');
+        $this->deleteId = null;
+
+        $this->resetPage();
     }
 }

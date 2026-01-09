@@ -43,7 +43,9 @@
     </div>
 
     <div class="menu-inner-shadow"></div>
-
+    <li class="menu-header mt-7">
+        <span class="menu-header-text">BERANDA</span>
+    </li>
     <ul class="menu-inner py-1">
         <li class="menu-item {{ request()->routeIs('dashboard') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -75,6 +77,26 @@
                         <div>Manajemen Pasien</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('medicines.index') ? 'active' : '' }}">
+                    <a href="{{ route('medicines.index') }}" wire:navigate class="menu-link">
+                        <div><i class="bi bi-capsule me-2"></i>Manajemen Obat</div>
+                    </a>
+                </li>
+
+            </ul>
+        </li>
+
+        <!-- Front Pages -->
+        <li class="menu-header mt-7">
+            <span class="menu-header-text">PELAYANAN</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon icon-base ri ri-file-copy-line"></i>
+                <div data-i18n="Front Pages">Layanan</div>
+                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto"></div>
+            </a>
+            <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('queue.index') ? 'active' : '' }}">
                     <a href="{{ route('queue.index') }}" wire:navigate class="menu-link">
                         <div>Antrean</div>
@@ -83,11 +105,6 @@
                 <li class="menu-item {{ request()->routeIs('medical.examination') ? 'active' : '' }}">
                     <a href="{{ route('medical.examination') }}" wire:navigate class="menu-link">
                         <div>Medical</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('medicines.index') ? 'active' : '' }}">
-                    <a href="{{ route('medicines.index') }}" wire:navigate class="menu-link">
-                        <div>Obat</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('prescriptions.index') ? 'active' : '' }}">
@@ -102,83 +119,4 @@
                 </li>
             </ul>
         </li>
-
-        <!-- Front Pages -->
-        {{-- <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon icon-base ri ri-file-copy-line"></i>
-                <div data-i18n="Front Pages">Front Pages</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto">Pro</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/front-pages/landing-page.html"
-                        class="menu-link" target="_blank">
-                        <div data-i18n="Landing">Landing</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/front-pages/pricing-page.html"
-                        class="menu-link" target="_blank">
-                        <div data-i18n="Pricing">Pricing</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/front-pages/payment-page.html"
-                        class="menu-link" target="_blank">
-                        <div data-i18n="Payment">Payment</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/front-pages/checkout-page.html"
-                        class="menu-link" target="_blank">
-                        <div data-i18n="Checkout">Checkout</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/front-pages/help-center-landing.html"
-                        class="menu-link" target="_blank">
-                        <div data-i18n="Help Center">Help Center</div>
-                    </a>
-                </li>
-            </ul>
-        </li> --}}
-
-        <!-- Apps & Pages -->
-        <li class="menu-header mt-7">
-            <span class="menu-header-text">Apps &amp; Pages</span>
-        </li>
-        <li class="menu-item">
-            <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-email.html"
-                target="_blank" class="menu-link">
-                <i class="menu-icon icon-base ri ri-mail-open-line"></i>
-                <div data-i18n="Email">Email</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto">Pro</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-chat.html"
-                target="_blank" class="menu-link">
-                <i class="menu-icon icon-base ri ri-wechat-line"></i>
-                <div data-i18n="Chat">Chat</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto">Pro</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-calendar.html"
-                target="_blank" class="menu-link">
-                <i class="menu-icon icon-base ri ri-calendar-line"></i>
-                <div data-i18n="Calendar">Calendar</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto">Pro</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-kanban.html"
-                target="_blank" class="menu-link">
-                <i class="menu-icon icon-base ri ri-drag-drop-line"></i>
-                <div data-i18n="Kanban">Kanban</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto">Pro</div>
-            </a>
-        </li>
-    </ul>
 </aside>

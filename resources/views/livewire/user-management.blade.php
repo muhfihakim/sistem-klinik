@@ -1,19 +1,12 @@
 <div>
 
-    @section('Css')
-        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
-        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
-        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css') }}" />
-        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
-        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css') }}" />
-    @endsection
-    <h4 class=" mb-4">Manajemen Pengguna</h4>
+    <h4 class="mb-4">Manajemen Pengguna</h4>
     @if (session()->has('message'))
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari...">
+            <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari Pengguna...">
             <button class="btn btn-primary" wire:click="create" type="button"><i class="bi bi-person-add me-2"></i>
                 Tambah Pengguna</button>
         </div>
@@ -42,8 +35,8 @@
                                         class="bi bi-pencil-square me-2"></i>
                                     Edit
                                 </button>
-                                <button wire:click="confirmDelete({{ $user->id }})"
-                                    class="btn btn-danger btn-sm"><i class="bi bi-trash3 me-2"></i>
+                                <button wire:click="confirmDelete({{ $user->id }})" class="btn btn-danger btn-sm"><i
+                                        class="bi bi-trash3 me-2"></i>
                                     Hapus
                                 </button>
                             </td>
@@ -145,8 +138,6 @@
 
 </div>
 @section('Scripts')
-    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}" data-navigate-once></script>
-    <script src="{{ asset('assets/js/tables-datatables-basic.js') }}" data-navigate-once></script>
     <script>
         document.addEventListener('livewire:init', () => {
             // pasang 1x saja walaupun livewire re-render / navigasi berkali-kali
@@ -166,5 +157,3 @@
         });
     </script>
 @endsection
-
-</div>
