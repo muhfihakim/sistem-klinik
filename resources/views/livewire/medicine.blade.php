@@ -11,7 +11,7 @@
             <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari Nama Obat...">
 
             <button class="btn btn-primary" wire:click="create" type="button">
-                <i class="bi bi-capsule me-2"></i> Tambah Obat
+                <i class="bi bi-plus-lg me-2"></i>Tambah Obat
             </button>
         </div>
 
@@ -27,7 +27,6 @@
 
             <div wire:loading.class="opacity-50" wire:target="nextPage,previousPage,gotoPage,search"
                 class="table-responsive text-nowrap">
-
                 <table class="table table-bordered">
                     <thead>
                         <tr>

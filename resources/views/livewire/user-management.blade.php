@@ -7,11 +7,19 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari Pengguna...">
-            <button class="btn btn-primary" wire:click="create" type="button"><i class="bi bi-person-add me-2"></i>
+            <button class="btn btn-primary" wire:click="create" type="button"><i class="bi bi-plus-lg me-2"></i>
                 Tambah Pengguna</button>
         </div>
 
-        <div class="table-responsive text-nowrap">
+        <div wire:loading.flex wire:target="nextPage,previousPage,gotoPage,search"
+            class="position-absolute top-50 start-50 translate-middle z-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div wire:loading.class="opacity-50" wire:target="nextPage,previousPage,gotoPage,search"
+            class="table-responsive text-nowrap">
             <table class="datatables-basic table table-bordered table-responsive">
                 <thead>
                     <tr>

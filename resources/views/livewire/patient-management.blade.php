@@ -9,7 +9,7 @@
             <input type="text" wire:model.live="search" class="form-control w-25"
                 placeholder="Cari Nama / No. RM / NIK...">
             <button class="btn btn-primary" wire:click="create" type="button">
-                <i class="bi bi-person-add me-2"></i> Tambah Pasien
+                <i class="bi bi-plus-lg me-2"></i>Tambah Pasien
             </button>
         </div>
         <div class="card-body position-relative">

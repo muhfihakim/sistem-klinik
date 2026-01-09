@@ -69,12 +69,12 @@
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('users.index') ? 'active' : '' }}">
                     <a href="{{ route('users.index') }}" wire:navigate class="menu-link">
-                        <div>Manajemen Pengguna</div>
+                        <div><i class="bi bi-people-fill me-2"></i>Manajemen Pengguna</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('patients.index') ? 'active' : '' }}">
                     <a href="{{ route('patients.index') }}" wire:navigate class="menu-link">
-                        <div>Manajemen Pasien</div>
+                        <div><i class="bi bi-person-heart me-2"></i>Manajemen Pasien</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('medicines.index') ? 'active' : '' }}">
