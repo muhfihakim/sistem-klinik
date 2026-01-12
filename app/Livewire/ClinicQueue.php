@@ -13,21 +13,19 @@ class ClinicQueue extends Component
     public string $searchPatient = '';
     public string $searchQueue = '';
     public ?string $complaint = null;
-
     public ?int $cancelId = null;
 
     public function render()
     {
         $today = now()->toDateString();
 
-        // daftar antrean hari ini (untuk tabel)
+        // Daftar antrean hari ini
         $queuesQuery = Appointment::with('patient')
             ->whereDate('date', $today)
             ->orderBy('queue_number', 'asc');
 
         if (strlen($this->searchQueue) > 0) {
             $s = $this->searchQueue;
-
             $queuesQuery->where(function ($q) use ($s) {
                 $q->where('queue_number', 'like', "%{$s}%")
                     ->orWhere('status', 'like', "%{$s}%")
@@ -40,13 +38,13 @@ class ClinicQueue extends Component
 
         $queues = $queuesQuery->get();
 
-        // ✅ ambil patient_id yang sedang aktif (waiting/checking)
+        // Pasien aktif
         $activePatientIds = Appointment::whereDate('date', $today)
             ->whereIn('status', ['waiting', 'checking'])
             ->pluck('patient_id')
             ->toArray();
 
-        // hasil cari pasien untuk ditambahkan
+        // Cari pasien
         $patients = [];
         if (strlen($this->searchPatient) >= 3) {
             $patients = Patient::query()
@@ -61,19 +59,16 @@ class ClinicQueue extends Component
         return view('livewire.clinic-queue', compact('queues', 'patients', 'activePatientIds'));
     }
 
-
     public function addToQueue(int $patientId)
     {
         $today = now()->toDateString();
-
-        // Hanya blokir kalau antrean masih aktif
         $activeExists = Appointment::where('patient_id', $patientId)
             ->whereDate('date', $today)
             ->whereIn('status', ['waiting', 'checking'])
             ->exists();
 
         if ($activeExists) {
-            session()->flash('error', 'Pasien sudah dalam antrean (waiting/checking) hari ini.');
+            session()->flash('error', 'Pasien sudah dalam antrean.');
             return;
         }
 
@@ -91,13 +86,11 @@ class ClinicQueue extends Component
         session()->flash('success', 'Pasien berhasil ditambahkan ke antrean.');
     }
 
-
-    // === BATALKAN ANTREAN ===
-
     public function confirmCancel(int $queueId)
     {
         $this->cancelId = $queueId;
-        $this->dispatch('open-cancel-queue-modal');
+        // Gunakan listener global
+        $this->dispatch('open-modal', modalId: '#cancelQueueModal');
     }
 
     public function cancelQueue()
@@ -106,19 +99,16 @@ class ClinicQueue extends Component
 
         $appointment = Appointment::findOrFail($this->cancelId);
 
-        // Optional safety: hanya bisa batalkan yang masih waiting
         if ($appointment->status !== 'waiting') {
-            session()->flash('error', 'Antrean ini tidak bisa dibatalkan karena statusnya bukan waiting.');
-            $this->dispatch('close-cancel-queue-modal');
-            $this->cancelId = null;
+            session()->flash('error', 'Antrean tidak bisa dibatalkan.');
+            $this->dispatch('close-modal', modalId: '#cancelQueueModal');
             return;
         }
 
-        $appointment->update([
-            'status' => 'cancelled',
-        ]);
+        $appointment->update(['status' => 'cancelled']);
 
-        $this->dispatch('close-cancel-queue-modal');
+        // Gunakan listener global
+        $this->dispatch('close-modal', modalId: '#cancelQueueModal');
         $this->cancelId = null;
 
         session()->flash('success', 'Antrean berhasil dibatalkan.');

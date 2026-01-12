@@ -214,18 +214,15 @@ class MedicalExamination extends Component
             return;
         }
 
-        // Tambahkan ke array prescriptions (format sama seperti sebelumnya)
         $this->prescriptions[] = [
             'medicine_id' => (int) $this->canvas_medicine_id,
             'quantity' => (int) $this->canvas_quantity,
             'instruction' => $this->canvas_instruction,
         ];
 
-        // tutup canvas
-        $this->dispatch('close-prescription-canvas');
+        // Gunakan listener global agar konsisten
+        $this->dispatch('close-modal', modalId: '#prescriptionCanvas');
 
-        // reset input canvas
         $this->reset(['canvas_medicine_id', 'canvas_quantity', 'canvas_instruction']);
-        $this->canvas_quantity = 1;
     }
 }

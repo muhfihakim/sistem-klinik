@@ -82,7 +82,6 @@
                         <div><i class="bi bi-capsule me-2"></i>Manajemen Obat</div>
                     </a>
                 </li>
-
             </ul>
         </li>
 

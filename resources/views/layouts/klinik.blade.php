@@ -7,7 +7,7 @@
     @include('layouts.partials.head')
     <!-- Scripts -->
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
-    {{-- @livewireScripts --}}
+    @livewireStyles
 </head>
 
 <body>
@@ -52,58 +52,105 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- / Layout wrapper -->
-    <!-- Core JS -->
+    <!-- Core JS (vendor) -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/js/bootstrap.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/libs/node-waves/node-waves.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}" data-navigate-once></script>
     <script src="{{ asset('assets/vendor/js/menu.js') }}" data-navigate-once></script>
-    @yield('Scripts')
-
-    <!-- Main JS -->
 
     <script src="{{ asset('assets/js/main.js') }}" data-navigate-once></script>
 
-    <script data-navigate-once>
-        document.addEventListener('livewire:navigated', () => {
-            const currentUrl = window.location.href.split(/[?#]/)[0]; // Bersihkan query string atau hash
+    @livewireScripts
 
-            // 1. Bersihkan SEMUA class active dan open terlebih dahulu agar tidak double
+    <script>
+        // Jalankan setiap kali wire:navigate selesai berpindah halaman
+        document.addEventListener('livewire:navigated', () => {
+            // 1. Inisialisasi ulang menu Materio agar dropdown & tombol sidebar tidak macet
+            if (window.Helpers && typeof window.Helpers.initMenu === 'function') {
+                window.Helpers.initMenu();
+            }
+
+            // 2. Logika Active Menu (Opsional jika sidebar macet)
+            const currentUrl = window.location.href.split(/[?#]/)[0];
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active', 'open');
-            });
-
-            // 2. Cari link yang aktif
-            const menuLinks = document.querySelectorAll('.menu-link');
-
-            menuLinks.forEach(link => {
-                // Normalisasi URL link untuk perbandingan
-                const linkUrl = link.href.split(/[?#]/)[0];
-
-                if (linkUrl === currentUrl) {
-                    const menuItem = link.closest('.menu-item');
-                    if (menuItem) {
-                        menuItem.classList.add('active');
-
-                        // Tambahkan active & open ke parent (Data Master / Dashboards)
-                        let parent = menuItem.parentElement.closest('.menu-item');
-                        while (parent) {
-                            parent.classList.add('active', 'open');
-                            parent = parent.parentElement.closest('.menu-item');
-                        }
+                const link = item.querySelector('a');
+                if (link && link.href.split(/[?#]/)[0] === currentUrl) {
+                    item.classList.add('active');
+                    let parent = item.parentElement.closest('.menu-item');
+                    while (parent) {
+                        parent.classList.add('active', 'open');
+                        parent = parent.parentElement.closest('.menu-item');
                     }
                 }
             });
+        });
+    </script>
+    {{-- <script data-navigate-once>
+        document.addEventListener('livewire:init', () => {
+            // Listener untuk menutup modal
+            Livewire.on('close-modal', (event) => {
+                const modalEl = document.querySelector(event.modalId);
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.hide();
 
-            // 3. Panggil ulang init menu Materio agar dropdown bisa diklik
-            if (window.Helpers) {
-                window.Helpers.initMenu();
-                // Jika sidebar tertutup otomatis, paksa buka kembali
-                if (!window.Helpers.isSmallDevice()) {
-                    window.Helpers.setCollapsed(false, false);
+                    // Opsional: Hapus backdrop secara manual jika masih nyangkut
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) backdrop.remove();
+                    document.body.classList.remove('modal-open');
+                    document.body.style = '';
                 }
-            }
+            });
+        });
+    </script> --}}
+    <script data-navigate-once>
+        document.addEventListener('livewire:init', () => {
+            // Listener Global: Menutup Modal apa pun berdasarkan ID yang dikirim
+            Livewire.on('close-modal', (event) => {
+                const id = event.modalId || (event[0] && event[0].modalId);
+                const modalEl = document.querySelector(id);
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.hide();
+
+                    // Bersihkan backdrop jika nyangkut
+                    setTimeout(() => {
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                        document.body.classList.remove('modal-open');
+                        document.body.style = '';
+                    }, 100);
+                }
+            });
+
+            // Listener Global: Membuka Modal
+            Livewire.on('open-modal', (event) => {
+                const id = event.modalId || (event[0] && event[0].modalId);
+                const modalEl = document.querySelector(id);
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
+            });
+
+            // Di layouts/app.blade.php
+            Livewire.on('close-modal', (event) => {
+                const id = event.modalId || (event[0] && event[0].modalId);
+                const el = document.querySelector(id);
+                if (el) {
+                    // Cek apakah itu Modal atau Offcanvas
+                    if (el.classList.contains('offcanvas')) {
+                        const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(el);
+                        offcanvas.hide();
+                    } else {
+                        const modal = bootstrap.Modal.getOrCreateInstance(el);
+                        modal.hide();
+                    }
+                }
+            });
         });
     </script>
 </body>

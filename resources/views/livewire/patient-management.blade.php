@@ -8,7 +8,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <input type="text" wire:model.live="search" class="form-control w-25"
                 placeholder="Cari Nama / No. RM / NIK...">
-            <button class="btn btn-primary" wire:click="create" type="button">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#patientModal" wire:click="create">
                 <i class="bi bi-plus-lg me-2"></i>Tambah Pasien
             </button>
         </div>
@@ -54,11 +54,12 @@
                                     {{ $p->gender }}
                                 </td>
                                 <td style="text-align:center;">
-                                    <button wire:click="edit({{ $p->id }})" class="btn btn-warning btn-sm">
+                                    <button wire:click="edit({{ $p->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#patientModal" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil-square me-2"></i> Edit
                                     </button>
-                                    <button wire:click="confirmDelete({{ $p->id }})"
-                                        class="btn btn-danger btn-sm">
+                                    <button wire:click="confirmDelete({{ $p->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#patientDeleteModal" class="btn btn-danger btn-sm">
                                         <i class="bi bi-trash3 me-2"></i> Hapus
                                     </button>
                                 </td>
@@ -189,6 +190,27 @@
 </div>
 
 @section('Scripts')
+    <script data-navigate-once>
+        // Fungsi pembantu untuk handle modal
+        const handleModal = (id, action) => {
+            const el = document.getElementById(id);
+            if (el) {
+                const modal = bootstrap.Modal.getOrCreateInstance(el);
+                action === 'show' ? modal.show() : modal.hide();
+            }
+        };
+
+        // Daftarkan listener sekali saja (data-navigate-once membantu ini)
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('open-patient-modal', () => handleModal('patientModal', 'show'));
+            Livewire.on('close-patient-modal', () => handleModal('patientModal', 'hide'));
+            Livewire.on('open-patient-delete-modal', () => handleModal('patientDeleteModal', 'show'));
+            Livewire.on('close-patient-delete-modal', () => handleModal('patientDeleteModal', 'hide'));
+        });
+    </script>
+@endsection
+
+{{-- @section('Scripts')
     <script>
         document.addEventListener('livewire:init', () => {
             if (window.__patientModalBound) return;
@@ -207,4 +229,4 @@
 
         });
     </script>
-@endsection
+@endsection --}}

@@ -48,9 +48,34 @@
                                 </tr>
                             </table>
 
-                            <button wire:click="processPayment" class="btn btn-success w-100 mt-3">
-                                <i class="ri-wallet-line me-2"></i> Bayar Sekarang (Midtrans)
-                            </button>
+                            <div class="btn-group w-100 mt-3">
+                                {{-- tombol utama (default) --}}
+                                <button type="button" class="btn btn-success w-100" wire:click="payCash">
+                                    <i class="ri-cash-line me-2"></i> Tunai
+                                </button>
+
+                                {{-- tombol dropdown split --}}
+                                <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end w-100">
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
+                                            wire:click="payCash">
+                                            <i class="ri-cash-line me-2"></i> Tunai
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
+                                            wire:click="processPayment">
+                                            <i class="ri-wallet-line me-2"></i> Non Tunai (Midtrans)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
                         </div>
                     @else
                         <div class="card-body text-center py-5">

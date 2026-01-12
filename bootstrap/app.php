@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // Pastikan memanggil CheckRole, bukan folder Middleware-nya saja
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'api/midtrans-callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

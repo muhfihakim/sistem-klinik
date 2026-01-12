@@ -7,8 +7,10 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari Pengguna...">
-            <button class="btn btn-primary" wire:click="create" type="button"><i class="bi bi-plus-lg me-2"></i>
-                Tambah Pengguna</button>
+            <button class="btn btn-primary" wire:click="create" data-bs-toggle="modal" data-bs-target="#userModal"
+                type="button">
+                <i class="bi bi-plus-lg me-2"></i>Tambah Pengguna
+            </button>
         </div>
 
         <div wire:loading.flex wire:target="nextPage,previousPage,gotoPage,search"
@@ -39,13 +41,13 @@
                             <td style="text-align: center"><span
                                     class="badge bg-label-info">{{ strtoupper($user->role) }}</span></td>
                             <td style="text-align: center">
-                                <button wire:click="edit({{ $user->id }})" class="btn btn-warning btn-sm"><i
-                                        class="bi bi-pencil-square me-2"></i>
-                                    Edit
+                                <button wire:click="edit({{ $user->id }})" data-bs-toggle="modal"
+                                    data-bs-target="#userModal" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil-square me-2"></i>Edit
                                 </button>
-                                <button wire:click="confirmDelete({{ $user->id }})" class="btn btn-danger btn-sm"><i
-                                        class="bi bi-trash3 me-2"></i>
-                                    Hapus
+                                <button wire:click="confirmDelete({{ $user->id }})" data-bs-toggle="modal"
+                                    data-bs-target="#userDeleteModal" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash3 me-2"></i>Hapus
                                 </button>
                             </td>
                         </tr>
@@ -120,25 +122,19 @@
         </div>
     </div>
 
-    <div wire:ignore.self class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="userDeleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Konfirmasi Hapus</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
-                    <p class="mb-0">
-                        Yakin ingin menghapus pengguna ini?
-                    </p>
+                    <p>Yakin ingin menghapus pengguna ini?</p>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" wire:click="destroy">
-                        Ya, Hapus
-                    </button>
+                    <button type="button" class="btn btn-danger" wire:click="destroy">Ya, Hapus</button>
                 </div>
             </div>
         </div>
@@ -146,22 +142,16 @@
 
 </div>
 @section('Scripts')
-    <script>
+    <script data-navigate-once>
+        // Sebenarnya bagian ini bisa dikosongkan jika app.blade.php sudah benar.
+        // Tapi jika ingin memastikan listener modal spesifik ada di sini:
         document.addEventListener('livewire:init', () => {
-            // pasang 1x saja walaupun livewire re-render / navigasi berkali-kali
-            if (window.__userModalBound) return;
-            window.__userModalBound = true;
+            Livewire.on('open-user-modal', () => {
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('userModal'));
+                modal.show();
+            });
 
-            const getModal = (id) => {
-                const el = document.getElementById(id);
-                return el ? bootstrap.Modal.getOrCreateInstance(el) : null;
-            };
-
-            Livewire.on('open-user-modal', () => getModal('userModal')?.show());
-            Livewire.on('close-user-modal', () => getModal('userModal')?.hide());
-
-            Livewire.on('open-delete-modal', () => getModal('deleteModal')?.show());
-            Livewire.on('close-delete-modal', () => getModal('deleteModal')?.hide());
+            // Listener 'close-modal' secara otomatis sudah dihandle di app.blade.php
         });
     </script>
 @endsection

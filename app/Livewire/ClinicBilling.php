@@ -25,46 +25,6 @@ class ClinicBilling extends Component
         }
     }
 
-    // public function processPayment()
-    // {
-    //     $total = $this->total_medicine_cost + $this->consultation_fee;
-
-    //     // 1. Buat/Update Record Billing
-    //     $billing = Billing::updateOrCreate(
-    //         ['appointment_id' => $this->selectedAppointment->id],
-    //         [
-    //             'patient_id' => $this->selectedAppointment->patient_id,
-    //             'invoice_number' => 'INV-' . time(),
-    //             'total_amount' => $total,
-    //             'status' => 'unpaid'
-    //         ]
-    //     );
-
-    //     // 2. Konfigurasi Midtrans
-    //     Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-    //     Config::$isProduction = env('MIDTRANS_IS_PRODUCTION');
-    //     Config::$isSanitized = true;
-    //     Config::$is3ds = true;
-
-    //     $params = [
-    //         'transaction_details' => [
-    //             'order_id' => $billing->invoice_number,
-    //             'gross_amount' => $total,
-    //         ],
-    //         'customer_details' => [
-    //             'first_name' => $this->selectedAppointment->patient->name,
-    //         ],
-    //     ];
-
-    //     // 3. Dapatkan Snap Token
-    //     $snapToken = Snap::getSnapToken($params);
-    //     $billing->update(['snap_token' => $snapToken]);
-
-    //     // 4. Kirim Token ke Browser (JavaScript)
-    //     $this->dispatch('show-snap-modal', token: $snapToken);
-    // }
-
-
     public function processPayment()
     {
         // Pengaman: Jika belum pilih pasien tapi klik tombol bayar
@@ -76,7 +36,7 @@ class ClinicBilling extends Component
         try {
             $total = $this->total_medicine_cost + $this->consultation_fee;
 
-            $billing = Billing::updateOrCreate(
+            $billing = Billing::firstOrCreate(
                 ['appointment_id' => $this->selectedAppointment->id],
                 [
                     'patient_id' => $this->selectedAppointment->patient_id,
@@ -102,7 +62,10 @@ class ClinicBilling extends Component
             ];
 
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-            $billing->update(['snap_token' => $snapToken]);
+            $billing->update([
+                'total_amount' => $total,
+                'status' => 'unpaid'
+            ]);
 
             $this->dispatch('show-snap-modal', token: $snapToken);
         } catch (\Exception $e) {
@@ -110,6 +73,43 @@ class ClinicBilling extends Component
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function payCash()
+    {
+        if (!$this->selectedAppointment) {
+            session()->flash('error', 'Silakan pilih pasien terlebih dahulu.');
+            return;
+        }
+
+        try {
+            $total = $this->total_medicine_cost + $this->consultation_fee;
+
+            $billing = Billing::firstOrCreate(
+                ['appointment_id' => $this->selectedAppointment->id],
+                [
+                    'patient_id' => $this->selectedAppointment->patient_id,
+                    'invoice_number' => 'INV-' . time(),
+                    'total_amount' => $total,
+                    'status' => 'unpaid',
+                ]
+            );
+
+            $billing->update([
+                'total_amount' => $total,
+                'status' => 'paid',
+                // optional kalau ada:
+                'payment_method' => 'cash',
+                'paid_at' => now(),
+            ]);
+
+            session()->flash('message', 'Pembayaran tunai berhasil.');
+            return redirect()->to(url()->current());
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+
 
     public function render()
     {

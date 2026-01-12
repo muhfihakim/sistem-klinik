@@ -17,10 +17,10 @@ class PatientManagement extends Component
 
     public string $search = '';
 
-    public ?int $patientId = null;   // pengganti selected_id
-    public ?int $deleteId  = null;   // khusus delete
+    public ?int $patientId = null;
+    public ?int $deleteId  = null;
 
-    public string $no_rm = '';       // kalau kolom ini memang ada & dipakai di form
+    public string $no_rm = '';
     public string $nik = '';
     public string $name = '';
     public string $gender = '';
@@ -36,9 +36,7 @@ class PatientManagement extends Component
     public function rules()
     {
         return [
-            // kalau no_rm diisi otomatis dari sistem, kamu bisa jadikan nullable & remove dari form
             'no_rm' => ['nullable', 'string', 'max:50'],
-
             'nik' => [
                 'required',
                 'digits:16',
@@ -65,7 +63,6 @@ class PatientManagement extends Component
             'address',
             'phone',
         ]);
-
         $this->resetValidation();
     }
 
@@ -86,11 +83,13 @@ class PatientManagement extends Component
     public function create()
     {
         $this->resetInputFields();
-        $this->dispatch('open-patient-modal');
+        // Membuka modal via dispatch (opsional jika sudah pakai data-bs-toggle)
+        $this->dispatch('open-modal', modalId: '#patientModal');
     }
 
     public function edit(int $id)
     {
+        $this->resetInputFields(); // Bersihkan state lama
         $patient = Patient::findOrFail($id);
 
         $this->patientId   = $patient->id;
@@ -102,63 +101,53 @@ class PatientManagement extends Component
         $this->address     = (string) $patient->address;
         $this->phone       = (string) ($patient->phone ?? '');
 
-        $this->resetValidation();
-        $this->dispatch('open-patient-modal');
+        // Dispatch untuk membuka modal edit
+        $this->dispatch('open-modal', modalId: '#patientModal');
     }
 
     public function store()
     {
         $this->validate();
 
+        $data = [
+            'no_rm'      => $this->no_rm,
+            'nik'        => $this->nik,
+            'name'       => $this->name,
+            'gender'     => $this->gender,
+            'birth_date' => $this->birth_date,
+            'address'    => $this->address,
+            'phone'      => $this->phone,
+        ];
+
         if ($this->patientId) {
-            $patient = Patient::findOrFail($this->patientId);
-
-            $patient->update([
-                'no_rm'      => $this->no_rm,
-                'nik'        => $this->nik,
-                'name'       => $this->name,
-                'gender'     => $this->gender,
-                'birth_date' => $this->birth_date,
-                'address'    => $this->address,
-                'phone'      => $this->phone,
-            ]);
-
+            Patient::find($this->patientId)->update($data);
             session()->flash('message', 'Data pasien berhasil diperbarui.');
         } else {
-            Patient::create([
-                'no_rm'      => $this->no_rm,
-                'nik'        => $this->nik,
-                'name'       => $this->name,
-                'gender'     => $this->gender,
-                'birth_date' => $this->birth_date,
-                'address'    => $this->address,
-                'phone'      => $this->phone,
-            ]);
-
+            Patient::create($data);
             session()->flash('message', 'Data pasien berhasil ditambahkan.');
         }
 
-        $this->dispatch('close-patient-modal');
+        // Tutup modal menggunakan listener global
+        $this->dispatch('close-modal', modalId: '#patientModal');
         $this->resetInputFields();
     }
 
     public function confirmDelete(int $id)
     {
         $this->deleteId = $id;
-        $this->dispatch('open-patient-delete-modal');
+        $this->dispatch('open-modal', modalId: '#patientDeleteModal');
     }
 
     public function destroy()
     {
-        if (!$this->deleteId) return;
+        if ($this->deleteId) {
+            Patient::find($this->deleteId)->delete();
 
-        Patient::findOrFail($this->deleteId)->delete();
+            // Tutup modal hapus menggunakan listener global
+            $this->dispatch('close-modal', modalId: '#patientDeleteModal');
 
-        session()->flash('message', 'Data pasien berhasil dihapus.');
-
-        $this->dispatch('close-patient-delete-modal');
-        $this->deleteId = null;
-
-        $this->resetPage();
+            $this->resetInputFields();
+            session()->flash('message', 'Data pasien berhasil dihapus.');
+        }
     }
 }

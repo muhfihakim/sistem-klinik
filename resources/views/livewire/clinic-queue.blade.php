@@ -134,9 +134,9 @@
                                 </td>
                                 <td style="text-align:center;">
                                     @if ($q->status === 'waiting')
-                                        <button wire:click="confirmCancel({{ $q->id }})"
-                                            class="btn btn-danger btn-sm"><i class="bi bi-x-circle me-2"></i>
-                                            Batalkan
+                                        <button wire:click="confirmCancel({{ $q->id }})" data-bs-toggle="modal"
+                                            data-bs-target="#cancelQueueModal" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-x-circle me-2"></i>Batalkan
                                         </button>
                                     @else
                                         <span class="text-muted">-</span>

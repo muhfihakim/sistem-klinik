@@ -10,7 +10,8 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <input type="text" wire:model.live="search" class="form-control w-25" placeholder="Cari Nama Obat...">
 
-            <button class="btn btn-primary" wire:click="create" type="button">
+            <button class="btn btn-primary" wire:click="create" data-bs-toggle="modal" data-bs-target="#medicineModal"
+                type="button">
                 <i class="bi bi-plus-lg me-2"></i>Tambah Obat
             </button>
         </div>
@@ -65,12 +66,12 @@
                                 </td>
 
                                 <td style="text-align:center;">
-                                    <button wire:click="edit({{ $m->id }})" class="btn btn-warning btn-sm">
+                                    <button wire:click="edit({{ $m->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#medicineModal" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil-square me-2"></i> Edit
                                     </button>
-
-                                    <button wire:click="confirmDelete({{ $m->id }})"
-                                        class="btn btn-danger btn-sm">
+                                    <button wire:click="confirmDelete({{ $m->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#medicineDeleteModal" class="btn btn-danger btn-sm">
                                         <i class="bi bi-trash3 me-2"></i> Hapus
                                     </button>
                                 </td>

@@ -16,8 +16,7 @@ class Medicine extends Component
     protected string $paginationTheme = 'bootstrap';
 
     public string $search = '';
-
-    public ?int $medicineId = null;   // pengganti selected_id
+    public ?int $medicineId = null;
     public ?int $deleteId = null;
 
     public string $name = '';
@@ -34,7 +33,7 @@ class Medicine extends Component
     {
         return [
             'name'  => ['required', 'min:3'],
-            'unit'  => ['required', Rule::in(['Tablet', 'Strip', 'Botol', 'Pcs'])], // sesuaikan jika unit kamu beda
+            'unit'  => ['required', Rule::in(['Tablet', 'Strip', 'Botol', 'Pcs'])],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
         ];
@@ -59,11 +58,12 @@ class Medicine extends Component
     public function create()
     {
         $this->resetInputFields();
-        $this->dispatch('open-medicine-modal');
+        $this->dispatch('open-modal', modalId: '#medicineModal');
     }
 
     public function edit(int $id)
     {
+        $this->resetInputFields();
         $medicine = Medicines::findOrFail($id);
 
         $this->medicineId = $medicine->id;
@@ -72,43 +72,36 @@ class Medicine extends Component
         $this->price = (int) $medicine->price;
         $this->stock = (int) $medicine->stock;
 
-        $this->resetValidation();
-        $this->dispatch('open-medicine-modal');
+        $this->dispatch('open-modal', modalId: '#medicineModal');
     }
 
     public function store()
     {
         $this->validate();
 
-        if ($this->medicineId) {
-            $medicine = Medicines::findOrFail($this->medicineId);
-            $medicine->update([
-                'name'  => $this->name,
-                'unit'  => $this->unit,
-                'price' => $this->price,
-                'stock' => $this->stock,
-            ]);
+        $data = [
+            'name'  => $this->name,
+            'unit'  => $this->unit,
+            'price' => $this->price,
+            'stock' => $this->stock,
+        ];
 
+        if ($this->medicineId) {
+            Medicines::find($this->medicineId)->update($data);
             session()->flash('message', 'Data Obat Diperbarui.');
         } else {
-            Medicines::create([
-                'name'  => $this->name,
-                'unit'  => $this->unit,
-                'price' => $this->price,
-                'stock' => $this->stock,
-            ]);
-
+            Medicines::create($data);
             session()->flash('message', 'Obat Baru Berhasil Ditambahkan.');
         }
 
-        $this->dispatch('close-medicine-modal');
+        $this->dispatch('close-modal', modalId: '#medicineModal');
         $this->resetInputFields();
     }
 
     public function confirmDelete(int $id)
     {
         $this->deleteId = $id;
-        $this->dispatch('open-medicine-delete-modal');
+        $this->dispatch('open-modal', modalId: '#medicineDeleteModal');
     }
 
     public function destroy()
@@ -116,12 +109,10 @@ class Medicine extends Component
         if (!$this->deleteId) return;
 
         Medicines::findOrFail($this->deleteId)->delete();
-
         session()->flash('message', 'Data Obat Berhasil Dihapus.');
 
-        $this->dispatch('close-medicine-delete-modal');
-        $this->deleteId = null;
-
+        $this->dispatch('close-modal', modalId: '#medicineDeleteModal');
+        $this->resetInputFields();
         $this->resetPage();
     }
 }

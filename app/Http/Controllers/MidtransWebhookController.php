@@ -10,16 +10,26 @@ class MidtransWebhookController extends Controller
     public function handle(Request $request)
     {
         $serverKey = env('MIDTRANS_SERVER_KEY');
-        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
-        if ($hashed == $request->signature_key) {
-            if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
-                $billing = Billing::where('invoice_number', $request->order_id)->first();
+        // Gunakan format gross_amount dari request langsung tanpa modifikasi
+        // agar signature_key cocok dengan kiriman Midtrans
+        $orderId = $request->order_id;
+        $statusCode = $request->status_code;
+        $grossAmount = $request->gross_amount;
+
+        $signature = hash("sha512", $orderId . $statusCode . $grossAmount . $serverKey);
+
+        if ($signature == $request->signature_key) {
+            $status = $request->transaction_status;
+
+            if ($status == 'settlement' || $status == 'capture') {
+                $billing = Billing::where('invoice_number', $orderId)->first();
                 if ($billing) {
                     $billing->update(['status' => 'paid']);
                 }
             }
         }
+
         return response()->json(['status' => 'success']);
     }
 }

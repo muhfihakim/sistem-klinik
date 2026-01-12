@@ -146,9 +146,10 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <label class="fw-bold mb-0">E-RESEP / OBAT</label>
 
-                                        <button type="button" wire:click="openPrescriptionCanvas"
-                                            class="btn btn-sm btn-primary"> <i class="bi bi-plus-lg me-2"></i>Tambah
-                                            Obat
+                                        <button type="button" data-bs-toggle="offcanvas"
+                                            data-bs-target="#prescriptionCanvas" wire:click="openPrescriptionCanvas"
+                                            class="btn btn-sm btn-primary">
+                                            <i class="bi bi-plus-lg me-2"></i>Tambah Obat
                                         </button>
                                     </div>
 

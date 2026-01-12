@@ -13,16 +13,12 @@ class UserManagement extends Component
 {
     use WithPagination;
 
-    // protected string $paginationTheme = 'bootstrap';
-
     #[Layout('layouts.klinik')]
     public $name = '', $email = '', $password = '', $role = '';
     public $userId = null;
-
     public $search = '';
     public $deleteId = null;
 
-    // Biar search reset pagination
     public function updatingSearch()
     {
         $this->resetPage();
@@ -56,28 +52,29 @@ class UserManagement extends Component
 
     private function resetInputFields()
     {
-        $this->reset(['name', 'email', 'password', 'role', 'userId']);
+        $this->reset(['name', 'email', 'password', 'role', 'userId', 'deleteId']);
         $this->resetValidation();
     }
 
     public function create()
     {
         $this->resetInputFields();
-        $this->dispatch('open-user-modal');
+        // Menggunakan listener global 'open-modal'
+        $this->dispatch('open-modal', modalId: '#userModal');
     }
 
     public function edit($id)
     {
+        $this->resetInputFields();
         $user = User::findOrFail($id);
 
         $this->userId = $user->id;
         $this->name   = $user->name;
         $this->email  = $user->email;
         $this->role   = $user->role;
-        $this->password = ''; // kosongkan, biar tidak ketimpa
+        $this->password = '';
 
-        $this->resetValidation();
-        $this->dispatch('open-user-modal');
+        $this->dispatch('open-modal', modalId: '#userModal');
     }
 
     public function store()
@@ -86,7 +83,6 @@ class UserManagement extends Component
 
         if ($this->userId) {
             $user = User::findOrFail($this->userId);
-
             $data = [
                 'name'  => $this->name,
                 'email' => $this->email,
@@ -96,9 +92,7 @@ class UserManagement extends Component
             if (!empty($this->password)) {
                 $data['password'] = Hash::make($this->password);
             }
-
             $user->update($data);
-
             session()->flash('message', 'User Diperbarui.');
         } else {
             User::create([
@@ -107,40 +101,35 @@ class UserManagement extends Component
                 'role'     => $this->role,
                 'password' => Hash::make($this->password),
             ]);
-
             session()->flash('message', 'User Dibuat.');
         }
 
-        $this->dispatch('close-user-modal');
+        // Menggunakan listener global 'close-modal'
+        $this->dispatch('close-modal', modalId: '#userModal');
         $this->resetInputFields();
     }
 
-    // === HAPUS VIA MODAL ===
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
-        $this->dispatch('open-delete-modal');
+        $this->dispatch('open-modal', modalId: '#userDeleteModal');
     }
 
     public function destroy()
     {
         if (!$this->deleteId) return;
 
-        // optional: cegah hapus akun sendiri
         if (auth()->check() && auth()->id() == $this->deleteId) {
-            session()->flash('message', 'Tidak bisa menghapus akun yang sedang digunakan.');
-            $this->dispatch('close-delete-modal');
-            $this->deleteId = null;
+            session()->flash('message', 'Tidak bisa menghapus akun sendiri.');
+            $this->dispatch('close-modal', modalId: '#userDeleteModal');
             return;
         }
 
         User::findOrFail($this->deleteId)->delete();
 
         session()->flash('message', 'User Berhasil Dihapus.');
-        $this->dispatch('close-delete-modal');
-        $this->deleteId = null;
-
-        // supaya tidak nyangkut di page kosong setelah delete
+        $this->dispatch('close-modal', modalId: '#userDeleteModal');
+        $this->resetInputFields();
         $this->resetPage();
     }
 }
