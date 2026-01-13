@@ -1,6 +1,6 @@
 <div>
 
-    <h4 class="mb-4">Laporan E-Resep (Farmasi)</h4>
+    <h4 class="mb-4">Layanan E-Resep (Farmasi)</h4>
     @if (session()->has('message'))
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
@@ -63,10 +63,8 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="pt-3 d-flex justify-content-center">
-                {{-- bawa query search ke pagination --}}
-                {{ $records->appends(request()->query())->links() }}
+            <div class="p-3 d-flex justify-content-center">
+                {{ $records->onEachSide(1)->links('livewire.layout.pagination-outline-primary') }}
             </div>
         </div>
     </div>

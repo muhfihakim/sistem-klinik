@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo me-1">
                 <span class="text-primary">
                     <svg width="30" height="24" viewBox="0 0 250 196" fill="none"
@@ -34,88 +34,112 @@
                     </svg>
                 </span>
             </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-2">Materio</span>
+            <span class="app-brand-text demo menu-text fw-semibold ms-2">SIKLINIK</span>
         </a>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+        {{-- <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
             <i class="menu-toggle-icon d-xl-inline-block align-middle"></i>
-        </a>
+        </a> --}}
     </div>
-
-    <div class="menu-inner-shadow"></div>
     <li class="menu-header mt-7">
         <span class="menu-header-text">BERANDA</span>
     </li>
     <ul class="menu-inner py-1">
-        <li class="menu-item {{ request()->routeIs('dashboard') ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon icon-base ri ri-home-smile-line"></i>
-                <div data-i18n="Dashboards">Dashboards</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <a href="{{ route('dashboard') }}" wire:navigate class="menu-link">
-                        <div data-i18n="Dashboard">Dashboard</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+        @auth
+            {{-- Dashboard bisa diakses SEMUA Role --}}
+            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon icon-base ri ri-home-smile-line"></i>
+                    <div data-i18n="Dashboards">Dashboards</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('dashboard') }}" wire:navigate class="menu-link">
+                            <div><i class="bi bi-info-square-fill me-2"></i>Dashboard</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <li class="menu-item {{ request()->routeIs('users.index') ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon icon-base ri ri-layout-2-line"></i>
-                <div data-i18n="Layouts">Data Master</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('users.index') ? 'active' : '' }}">
-                    <a href="{{ route('users.index') }}" wire:navigate class="menu-link">
-                        <div><i class="bi bi-people-fill me-2"></i>Manajemen Pengguna</div>
+            {{-- Menu DATA MASTER --}}
+            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
+                <li
+                    class="menu-item {{ request()->routeIs(['users.index', 'patients.index', 'medicines.index']) ? 'active open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon icon-base ri ri-layout-2-line"></i>
+                        <div data-i18n="Layouts">Data Master</div>
                     </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('patients.index') ? 'active' : '' }}">
-                    <a href="{{ route('patients.index') }}" wire:navigate class="menu-link">
-                        <div><i class="bi bi-person-heart me-2"></i>Manajemen Pasien</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('medicines.index') ? 'active' : '' }}">
-                    <a href="{{ route('medicines.index') }}" wire:navigate class="menu-link">
-                        <div><i class="bi bi-capsule me-2"></i>Manajemen Obat</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                    <ul class="menu-sub">
+                        {{-- Manajemen Pengguna KHUSUS Admin --}}
+                        @if (auth()->user()->role === 'admin')
+                            <li class="menu-item {{ request()->routeIs('users.index') ? 'active' : '' }}">
+                                <a href="{{ route('users.index') }}" wire:navigate class="menu-link">
+                                    <div><i class="bi bi-people-fill me-2"></i>Pengguna</div>
+                                </a>
+                            </li>
+                        @endif
 
-        <!-- Front Pages -->
-        <li class="menu-header mt-7">
-            <span class="menu-header-text">PELAYANAN</span>
-        </li>
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon icon-base ri ri-file-copy-line"></i>
-                <div data-i18n="Front Pages">Layanan</div>
-                <div class="badge rounded-pill bg-label-primary fs-tiny ms-auto"></div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('queue.index') ? 'active' : '' }}">
-                    <a href="{{ route('queue.index') }}" wire:navigate class="menu-link">
-                        <div>Antrean</div>
-                    </a>
+                        {{-- Pasien & Obat bisa diakses Admin dan Staff --}}
+                        <li class="menu-item {{ request()->routeIs('patients.index') ? 'active' : '' }}">
+                            <a href="{{ route('patients.index') }}" wire:navigate class="menu-link">
+                                <div><i class="bi bi-person-heart me-2"></i>Pasien</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('medicines.index') ? 'active' : '' }}">
+                            <a href="{{ route('medicines.index') }}" wire:navigate class="menu-link">
+                                <div><i class="bi bi-capsule me-2"></i>Obat</div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="menu-item {{ request()->routeIs('medical.examination') ? 'active' : '' }}">
-                    <a href="{{ route('medical.examination') }}" wire:navigate class="menu-link">
-                        <div>Medical</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('prescriptions.index') ? 'active' : '' }}">
-                    <a href="{{ route('prescriptions.index') }}" wire:navigate class="menu-link">
-                        <div>Resep</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('billing.index') ? 'active' : '' }}">
-                    <a href="{{ route('billing.index') }}" wire:navigate class="menu-link">
-                        <div>Pembayaran</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            @endif
+
+            <li class="menu-header mt-7">
+                <span class="menu-header-text">PELAYANAN</span>
+            </li>
+            <li
+                class="menu-item {{ request()->routeIs(['queue.index', 'medical.examination', 'prescriptions.index', 'billing.index']) ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon icon-base ri ri-file-copy-line"></i>
+                    <div data-i18n="Front Pages">Layanan</div>
+                </a>
+                <ul class="menu-sub">
+                    {{-- Antrean: Admin & Staff (Pendaftaran) --}}
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
+                        <li class="menu-item {{ request()->routeIs('queue.index') ? 'active' : '' }}">
+                            <a href="{{ route('queue.index') }}" wire:navigate class="menu-link">
+                                <div><i class="bi bi-list-task me-2"></i>Antrean</div>
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- Medical (SOAP): Admin & Dokter --}}
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'doctor')
+                        <li class="menu-item {{ request()->routeIs('medical.examination') ? 'active' : '' }}">
+                            <a href="{{ route('medical.examination') }}" wire:navigate class="menu-link">
+                                <div><i class="bi bi-file-medical me-2"></i>Medical (RME)</div>
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- Resep: Admin, Dokter (Riwayat), & Staff (Farmasi/Apotek) --}}
+                    {{-- Menu ini penting agar Staff bisa melihat obat apa yang harus disiapkan --}}
+                    <li class="menu-item {{ request()->routeIs('prescriptions.index') ? 'active' : '' }}">
+                        <a href="{{ route('prescriptions.index') }}" wire:navigate class="menu-link">
+                            <div><i class="bi bi-prescription me-2"></i>Resep Obat</div>
+                        </a>
+                    </li>
+
+                    {{-- Pembayaran: Admin & Staff (Kasir) --}}
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
+                        <li class="menu-item {{ request()->routeIs('billing.index') ? 'active' : '' }}">
+                            <a href="{{ route('billing.index') }}" wire:navigate class="menu-link">
+                                <div><i class="bi bi-credit-card-2-back me-2"></i>Pembayaran</div>
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            </li>
+        @endauth
+    </ul>
 </aside>

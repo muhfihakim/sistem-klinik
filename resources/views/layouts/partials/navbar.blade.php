@@ -8,22 +8,16 @@
 
     <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
         <!-- Search -->
-        <div class="navbar-nav align-items-center">
-            <div class="nav-item d-flex align-items-center">
-                <i class="icon-base ri ri-search-line icon-lg lh-0"></i>
-                <input type="text" class="form-control border-0 shadow-none" placeholder="Search..."
-                    aria-label="Search..." />
-            </div>
-        </div>
+        @livewire('navbar-search')
         <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-md-auto">
             <!-- Place this tag where you want the button to render. -->
             <li class="nav-item lh-1 me-4">
-                <a class="github-button"
-                    href="https://github.com/themeselection/materio-bootstrap-html-admin-template-free"
-                    data-icon="octicon-star" data-size="large" data-show-count="true"
-                    aria-label="Star themeselection/materio-html-admin-template-free on GitHub">Star</a>
+                @auth
+                    <a class="github-button" href="#" data-icon="octicon-star" data-size="large"
+                        data-show-count="true">{{ auth()->user()->name }}</a>
+                @endauth
             </li>
 
             <!-- User -->
@@ -44,8 +38,10 @@
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-0">John Doe</h6>
-                                    <small class="text-body-secondary">Admin</small>
+                                    @auth
+                                        <h6 class="mb-0">{{ auth()->user()->name }}</h6>
+                                        <small class="text-body-secondary">{{ ucfirst(auth()->user()->role) }}</small>
+                                    @endauth
                                 </div>
                             </div>
                         </a>
@@ -56,34 +52,33 @@
                     <li>
                         <a class="dropdown-item" href="{{ route('profile') }}">
                             <i class="icon-base ri ri-user-line icon-md me-3"></i>
-                            <span>My Profile</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="icon-base ri ri-settings-4-line icon-md me-3"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <span class="d-flex align-items-center align-middle">
-                                <i class="flex-shrink-0 icon-base ri ri-bank-card-line icon-md me-3"></i>
-                                <span class="flex-grow-1 align-middle ms-1">Billing Plan</span>
-                                <span class="flex-shrink-0 badge rounded-pill bg-danger">4</span>
-                            </span>
+                            <span>Profil</span>
                         </a>
                     </li>
                     <li>
                         <div class="dropdown-divider my-1"></div>
                     </li>
-                    <li>
+                    {{-- <li>
                         <div class="d-grid px-4 pt-2 pb-1">
                             <a class="btn btn-danger d-flex" href="javascript:void(0);">
                                 <small class="align-middle">Logout</small>
                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                             </a>
                         </div>
+                    </li> --}}
+                    <li>
+                        <div class="d-grid px-4 pt-2 pb-1">
+                            <a class="btn btn-danger d-flex" href="{{ route('logout') }}"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <small class="align-middle">Logout</small>
+                                <i class="ri-logout-box-r-line ms-2 ri-xs"></i>
+                            </a>
+                        </div>
+
+                        {{-- Form tersembunyi untuk proses POST --}}
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
                     </li>
                 </ul>
             </li>

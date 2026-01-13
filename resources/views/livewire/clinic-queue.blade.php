@@ -89,15 +89,15 @@
         <div class="card-body position-relative p-0">
 
             {{-- Spinner saat filter antrean --}}
-            <div wire:loading.flex wire:target="searchQueue"
+            <div wire:loading.flex wire:target="nextPage,previousPage,gotoPage,searchQueue"
                 class="position-absolute top-50 start-50 translate-middle z-3">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
 
-            <div class="table-responsive text-nowrap" wire:loading.class="opacity-50" wire:target="searchQueue">
-
+            <div wire:loading.class="opacity-50" wire:target="nextPage,previousPage,gotoPage,searchQueue"
+                class="table-responsive text-nowrap">
                 <table class="table table-bordered mb-0">
                     <thead>
                         <tr>
@@ -152,6 +152,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div class="p-3 d-flex justify-content-center">
+                {{ $queues->onEachSide(1)->links('livewire.layout.pagination-outline-primary') }}
             </div>
         </div>
     </div>

@@ -2,7 +2,7 @@
 
 
 
-    <h4 class="mb-4">Manajemen Pemeriksaan</h4>
+    <h4 class="mb-4">Layanan Pemeriksaan</h4>
 
     @if (session()->has('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
