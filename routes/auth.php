@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\VerifyEmailController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -8,8 +9,25 @@ Route::middleware('guest')->group(function () {
     Volt::route('register', 'pages.auth.register')
         ->name('register');
 
-    Volt::route('login', 'pages.auth.login')
-        ->name('login');
+    // 1. Ini untuk menampilkan halaman (yang tadi kita ubah)
+    Route::view('login', 'livewire.pages.auth.login')->name('login');
+
+    // 2. TAMBAHKAN INI: Untuk memproses data login (Metode POST)
+    Route::post('login', function (Request $request) {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials, $request->remember)) {
+            $request->session()->regenerate();
+            return redirect()->intended('dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
+    });
 
     Volt::route('forgot-password', 'pages.auth.forgot-password')
         ->name('password.request');

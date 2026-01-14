@@ -47,20 +47,12 @@
     <ul class="menu-inner py-1">
         @auth
             {{-- Dashboard bisa diakses SEMUA Role --}}
-            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" wire:navigate class="menu-link">
                     <i class="menu-icon icon-base ri ri-home-smile-line"></i>
-                    <div data-i18n="Dashboards">Dashboards</div>
+                    <div data-i18n="Dashboards">Dashboard</div>
                 </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard') }}" wire:navigate class="menu-link">
-                            <div><i class="bi bi-info-square-fill me-2"></i>Dashboard</div>
-                        </a>
-                    </li>
-                </ul>
             </li>
-
             {{-- Menu DATA MASTER --}}
             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                 <li
@@ -139,6 +131,15 @@
                         </li>
                     @endif
                 </ul>
+            <li class="menu-header mt-7">
+                <span class="menu-header-text">PENGATURAN</span>
+            </li>
+            <li class="menu-item {{ request()->routeIs('profile') ? 'active' : '' }}">
+                <a href="{{ route('profile') }}" wire:navigate class="menu-link">
+                    <i class="menu-icon icon-base ri ri-user-line"></i>
+                    <div data-i18n="Profile">Profil Saya</div>
+                </a>
+            </li>
             </li>
         @endauth
     </ul>

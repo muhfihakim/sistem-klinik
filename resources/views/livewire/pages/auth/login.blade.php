@@ -5,29 +5,42 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>Login | SIKLINIK</title>
+    <title>SIKLINIK - Sistem Informasi Manajemen Klinik & Rekam Medis Elektronik</title>
+    <meta name="title" content="SIKLINIK - Sistem Informasi Manajemen Klinik & Rekam Medis Elektronik">
+    <meta name="description"
+        content="SIKLINIK: Solusi digital manajemen klinik, rekam medis elektronik (RME), antrean pasien, dan sistem kasir medis terintegrasi. Meningkatkan efisiensi layanan kesehatan Anda.">
+    <meta name="keywords"
+        content="sistem informasi klinik, rekam medis elektronik, aplikasi klinik, RME, manajemen antrean klinik, software rumah sakit, SIKLINIK, pendaftaran pasien online">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="SIKLINIK">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="SIKLINIK - Digitalisasi Layanan Kesehatan Anda">
+    <meta property="og:description"
+        content="Kelola antrean, rekam medis (SOAP), hingga pembayaran klinik dalam satu sistem terintegrasi.">
+    <meta property="og:site_name" content="SIKLINIK">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SIKLINIK - Manajemen Klinik Modern">
+    <meta name="twitter:description"
+        content="Optimalkan operasional klinik dengan Sistem Informasi Manajemen Klinik yang efisien dan aman.">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- Asset --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/iconify-icons.css') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}" />
-
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
 
@@ -59,8 +72,8 @@
                             <span class="app-brand-text demo text-heading fw-semibold uppercase">SIKLINIK</span>
                         </a>
                     </div>
-                    <h4 class="mb-1">Selamat Datang! 👋</h4>
-                    <p class="mb-5">Silakan login untuk mengakses dashboard.</p>
+                    <h4 class="mb-1 text-center">Selamat Datang! 👋</h4>
+                    <p class="mb-5 text-center">Silakan login untuk mengakses dashboard.</p>
 
                     @if (session('status'))
                         <div class="alert alert-success mb-3">{{ session('status') }}</div>
@@ -71,8 +84,8 @@
                         <div class="form-floating form-floating-outline mb-5">
                             <input type="email" class="form-control @error('email') is-invalid @enderror"
                                 id="email" name="email" placeholder="nama@email.com" value="{{ old('email') }}"
-                                autofocus required />
-                            <label for="email">Email</label>
+                                autofocus autocomplete="off" required />
+                            <label for="email">Alamat Email</label>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -84,10 +97,9 @@
                                     <div class="form-floating form-floating-outline">
                                         <input type="password" id="password"
                                             class="form-control @error('password') is-invalid @enderror" name="password"
-                                            placeholder="············" required />
-                                        <label for="password">Password</label>
+                                            placeholder="············" autocomplete="off" required />
+                                        <label for="password">Kata Sandi</label>
                                     </div>
-                                    <span class="input-group-text cursor-pointer"><i class="ri-eye-off-line"></i></span>
                                 </div>
                                 @error('password')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
