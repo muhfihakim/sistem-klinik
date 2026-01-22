@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Appointment;
 use App\Models\Billing;
+use App\Services\WhatsAppService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
@@ -83,25 +84,52 @@ class ClinicBilling extends Component
     }
 
     #[On('payment-finished')]
-    public function handlePaymentFinished($status, $name)
+    public function handlePaymentFinished($status, $name, WhatsAppService $waService)
     {
         if ($status === 'success') {
-            // 1. Simpan pesan ke session
-            session()->flash('success', 'Pembayaran Non-Tunai berhasil untuk pasien: ' . $name);
+            // Cari billing yang terkait dengan appointment yang sedang dipilih dan statusnya masih unpaid
+            $billing = Billing::where('appointment_id', $this->selectedAppointment->id)
+                ->where('status', 'unpaid')
+                ->first();
 
-            // 2. Reset properti agar tampilan bersih
+            if ($billing) {
+                // 1. Update status di database
+                $billing->update([
+                    'status' => 'paid',
+                    'payment_method' => 'midtrans',
+                    'paid_at' => now()
+                ]);
+
+                // 2. Siapkan data WhatsApp
+                $downloadUrl = route('invoice.download', $billing->id);
+                $patient = $billing->patient;
+
+                if ($patient && $patient->phone) {
+                    // Template disamakan dengan kuitansi tunai
+                    $pesan = "*KUITANSI PEMBAYARAN LUNAS (ONLINE)*\n\n" .
+                        "Halo *" . $patient->name . "*,\n" .
+                        "Pembayaran online Anda telah berhasil kami terima.\n\n" .
+                        "No. Invoice: " . $billing->invoice_number . "\n" .
+                        "Total: *Rp " . number_format($billing->total_amount, 0, ',', '.') . "*\n" .
+                        "Status: *LUNAS*\n\n" .
+                        "Unduh kuitansi PDF di sini:\n" . $downloadUrl . "\n\n" .
+                        "Terima kasih, semoga lekas sembuh.";
+
+                    $waService->sendMessage($patient->phone, $pesan);
+                }
+
+                session()->flash('success', 'Pembayaran online berhasil & Kuitansi WA terkirim.');
+            }
+
             $this->selectedAppointment = null;
-            $this->total_medicine_cost = 0;
-
-            // 3. Redirect murni (Hard Redirect) untuk membersihkan Query String Midtrans
             return redirect()->route('billing.index');
         }
     }
 
-    public function payCash()
+    public function payCash(WhatsAppService $waService)
     {
         if (!$this->selectedAppointment) {
-            session()->flash('error', 'Silakan pilih pasien terlebih dahulu.');
+            session()->flash('error', 'Pilih pasien terlebih dahulu.');
             return;
         }
 
@@ -120,30 +148,90 @@ class ClinicBilling extends Component
                 ]
             );
 
-            // Gunakan 'success' agar sesuai dengan alert di view
-            session()->flash('success', 'Pembayaran tunai berhasil diproses untuk pasien ' . $this->selectedAppointment->patient->name);
+            $downloadUrl = route('invoice.download', $billing->id);
+            $patient = $this->selectedAppointment->patient;
 
-            // Reset state agar form rincian tertutup dan kembali ke "Pilih Pasien"
+            if ($patient && $patient->phone) {
+                // Template disamakan dengan kuitansi online
+                $pesan = "*KUITANSI PEMBAYARAN LUNAS (CASH)*\n\n" .
+                    "Halo *" . $patient->name . "*,\n" .
+                    "Pembayaran tunai Anda telah kami terima.\n\n" .
+                    "No. Invoice: " . $billing->invoice_number . "\n" .
+                    "Total: *Rp " . number_format($total, 0, ',', '.') . "*\n" .
+                    "Status: *LUNAS*\n\n" .
+                    "Unduh kuitansi PDF di sini:\n" . $downloadUrl . "\n\n" .
+                    "Terima kasih, semoga lekas sembuh.";
+
+                $waService->sendMessage($patient->phone, $pesan);
+            }
+
+            session()->flash('success', 'Pembayaran tunai berhasil & Kuitansi WA terkirim.');
             $this->selectedAppointment = null;
-            $this->total_medicine_cost = 0;
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            session()->flash('error', $e->getMessage());
         }
     }
 
-    // public function render()
-    // {
-    //     $pendingBills = Appointment::with(['patient', 'medicalRecord.prescriptions.medicine'])
-    //         ->where('status', 'finished')
-    //         ->where(function ($query) {
-    //             $query->whereDoesntHave('billing')
-    //                 ->orWhereHas('billing', function ($q) {
-    //                     $q->where('status', 'unpaid');
-    //                 });
-    //         })->get();
+    public function sendWhatsAppBilling(WhatsAppService $waService)
+    {
+        if (!$this->selectedAppointment) {
+            session()->flash('error', 'Pilih pasien dulu.');
+            return;
+        }
 
-    //     return view('livewire.clinic-billing', compact('pendingBills'));
-    // }
+        try {
+            $total = $this->total_medicine_cost + $this->consultation_fee;
+
+            // 1. Pastikan Billing sudah ada di database atau buat baru
+            $billing = Billing::updateOrCreate(
+                ['appointment_id' => $this->selectedAppointment->id],
+                [
+                    'patient_id' => $this->selectedAppointment->patient_id,
+                    'invoice_number' => 'INV-' . time(),
+                    'total_amount' => $total,
+                    'status' => 'unpaid'
+                ]
+            );
+
+            // 2. Generate Link Midtrans (hanya link, tidak buka modal di kasir)
+            \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+            \Midtrans\Config::$isProduction = false;
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $billing->invoice_number,
+                    'gross_amount' => (int) $total,
+                ],
+                'customer_details' => [
+                    'first_name' => $this->selectedAppointment->patient->name,
+                    'phone' => $this->selectedAppointment->patient->phone,
+                ],
+            ];
+
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $paymentUrl = "https://app.sandbox.midtrans.com/snap/v2/vtweb/" . $snapToken;
+
+            // 3. Kirim Pesan WA
+            $patient = $this->selectedAppointment->patient;
+            if ($patient && $patient->phone) {
+                $pesan = "*TAGIHAN PEMERIKSAAN SIKLINIK*\n\n" .
+                    "Halo *" . $patient->name . "*,\n" .
+                    "Rincian tagihan Anda:\n" .
+                    "Total: *Rp " . number_format($total, 0, ',', '.') . "*\n\n" .
+                    "Metode Pembayaran:\n" .
+                    "1. *TUNAI*: Langsung ke Kasir Klinik.\n" .
+                    "2. *ONLINE*: Klik link berikut: \n" . $paymentUrl . "\n\n" .
+                    "Abaikan jika sudah membayar di kasir.";
+
+                $waService->sendMessage($patient->phone, $pesan);
+                session()->flash('success', 'Tagihan berhasil dikirim ke WhatsApp pasien.');
+            } else {
+                session()->flash('error', 'Nomor WA pasien tidak ditemukan.');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal mengirim WA: ' . $e->getMessage());
+        }
+    }
 
     public function render()
     {

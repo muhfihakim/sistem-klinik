@@ -96,10 +96,21 @@
                     <div class="modal-body">
 
                         <div class="form-floating form-floating-outline mb-6">
-                            <input type="text" id="noRm" class="form-control" wire:model="no_rm"
-                                placeholder="Masukkan No. Rekam Medis" autocomplete="off">
-                            <label for="noRm">No. Rekam Medis</label>
+                            <input type="text" id="noRm" class="form-control bg-light" wire:model="no_rm"
+                                placeholder="Otomatis" readonly> {{-- Tambahkan readonly dan bg-light --}}
+                            <label for="noRm">No. Rekam Medis (Otomatis)</label>
                             @error('no_rm')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        {{-- Tambahkan Input Phone/WhatsApp di bawah Alamat --}}
+                        <div class="form-floating form-floating-outline mb-6">
+                            <input type="text" id="phone" class="form-control" wire:model="phone"
+                                placeholder="62812xxxxxx" autocomplete="off">
+                            <label for="phone">Nomor WhatsApp/Telepon</label>
+                            <div class="form-text">Gunakan format 628... untuk pengiriman tagihan WA.</div>
+                            @error('phone')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
@@ -209,24 +220,3 @@
         });
     </script>
 @endsection
-
-{{-- @section('Scripts')
-    <script>
-        document.addEventListener('livewire:init', () => {
-            if (window.__patientModalBound) return;
-            window.__patientModalBound = true;
-
-            const getModal = (id) => {
-                const el = document.getElementById(id);
-                return el ? bootstrap.Modal.getOrCreateInstance(el) : null;
-            };
-
-            Livewire.on('open-patient-modal', () => getModal('patientModal')?.show());
-            Livewire.on('close-patient-modal', () => getModal('patientModal')?.hide());
-
-            Livewire.on('open-patient-delete-modal', () => getModal('patientDeleteModal')?.show());
-            Livewire.on('close-patient-delete-modal', () => getModal('patientDeleteModal')?.hide());
-
-        });
-    </script>
-@endsection --}}

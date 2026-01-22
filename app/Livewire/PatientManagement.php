@@ -80,11 +80,37 @@ class PatientManagement extends Component
         return view('livewire.patient-management', compact('patients'));
     }
 
+    // public function create()
+    // {
+    //     $this->resetInputFields();
+    //     // Membuka modal via dispatch (opsional jika sudah pakai data-bs-toggle)
+    //     $this->dispatch('open-modal', modalId: '#patientModal');
+    // }
+
     public function create()
     {
         $this->resetInputFields();
-        // Membuka modal via dispatch (opsional jika sudah pakai data-bs-toggle)
+        // Generate No. RM otomatis (Contoh: RM-20240119-0001)
+        $this->no_rm = $this->generateNoRM();
         $this->dispatch('open-modal', modalId: '#patientModal');
+    }
+
+    private function generateNoRM(): string
+    {
+        $date = now()->format('Ymd'); // Format 20260119
+        $lastPatient = Patient::whereDate('created_at', now()->toDateString())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastPatient) {
+            return "RM-" . $date . "-0001";
+        }
+
+        // Ambil 4 digit terakhir dari no_rm terakhir
+        $lastNumber = substr($lastPatient->no_rm, -4);
+        $nextNumber = str_pad((int)$lastNumber + 1, 4, '0', STR_PAD_LEFT);
+
+        return "RM-" . $date . "-" . $nextNumber;
     }
 
     public function edit(int $id)

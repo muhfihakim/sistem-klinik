@@ -124,30 +124,44 @@
                             </tr>
                         </table>
 
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-outline-success w-100 p-2"
+                                wire:click="sendWhatsAppBilling" wire:loading.attr="disabled">
+                                <span wire:loading wire:target="sendWhatsAppBilling"
+                                    class="spinner-border spinner-border-sm me-2"></span>
+                                <i class="ri-whatsapp-line me-2" wire:loading.remove
+                                    wire:target="sendWhatsAppBilling"></i>
+                                Kirim Tagihan ke WhatsApp Pasien
+                            </button>
+                        </div>
+
                         <div class="mt-5">
-                            <label class="mb-2 fw-bold">Metode Pembayaran:</label>
-                            <div class="btn-group w-100">
-                                <button type="button" class="btn btn-success p-3" wire:click="payCash"
-                                    wire:loading.attr="disabled">
-                                    <span wire:loading wire:target="payCash"
-                                        class="spinner-border spinner-border-sm me-2"></span>
-                                    <i class="ri-cash-line me-2" wire:loading.remove wire:target="payCash"></i>
-                                    BAYAR TUNAI (CASH)
-                                </button>
-                                <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end w-100">
-                                    <li>
-                                        <a class="dropdown-item py-2" href="javascript:void(0)"
-                                            wire:click="processPayment" wire:loading.class="disabled">
-                                            <i class="ri-wallet-line me-2 text-primary"></i>
-                                            <span wire:loading.remove wire:target="processPayment">Non Tunai
-                                                (Midtrans)</span>
-                                            <span wire:loading wire:target="processPayment">Menghubungkan...</span>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <label class="mb-2 fw-bold text-uppercase"
+                                style="font-size: 0.8rem; letter-spacing: 1px;">Metode Pembayaran:</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button type="button"
+                                        class="btn btn-success w-100 py-3 fw-bold d-flex align-items-center justify-content-center"
+                                        wire:click="payCash" wire:loading.attr="disabled">
+                                        <span wire:loading wire:target="payCash"
+                                            class="spinner-border spinner-border-sm me-2"></span>
+                                        <i class="ri-cash-line ri-lg me-2" wire:loading.remove
+                                            wire:target="payCash"></i>
+                                        BAYAR TUNAI (CASH)
+                                    </button>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <button type="button"
+                                        class="btn btn-primary w-100 py-3 fw-bold d-flex align-items-center justify-content-center"
+                                        wire:click="processPayment" wire:loading.attr="disabled">
+                                        <span wire:loading wire:target="processPayment"
+                                            class="spinner-border spinner-border-sm me-2"></span>
+                                        <i class="ri-wallet-line ri-lg me-2" wire:loading.remove
+                                            wire:target="processPayment"></i>
+                                        NON TUNAI (MIDTRANS)
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

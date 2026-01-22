@@ -140,6 +140,12 @@
                     <div data-i18n="Profile">Profil Saya</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}">
+                <a href="{{ route('whatsapp.settings') }}" wire:navigate class="menu-link">
+                    <i class="menu-icon icon-base ri ri-whatsapp-line"></i>
+                    <div data-i18n="WhatsApp">WhatsApp Gateway</div>
+                </a>
+            </li>
             </li>
         @endauth
     </ul>

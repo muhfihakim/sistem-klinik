@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin bisa mengakses semua menu termasuk manajemen user
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/users', \App\Livewire\UserManagement::class)->name('users.index');
+        Route::get('/whatsapp', \App\Livewire\WhatsappSettings::class)->name('whatsapp.settings');
         // Admin biasanya juga memantau semua data master
     });
 

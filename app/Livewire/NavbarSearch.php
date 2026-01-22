@@ -32,6 +32,9 @@ class NavbarSearch extends Component
             ['title' => 'Layanan: Medical (RME)', 'route' => 'medical.examination', 'icon' => 'bi-file-medical', 'roles' => ['admin', 'doctor']],
             ['title' => 'Layanan: Resep Obat', 'route' => 'prescriptions.index', 'icon' => 'bi-prescription', 'roles' => ['admin', 'staff', 'doctor']],
             ['title' => 'Layanan: Pembayaran', 'route' => 'billing.index', 'icon' => 'bi-credit-card-2-back', 'roles' => ['admin', 'staff']],
+
+            // Profil
+            ['title' => 'Pengaturan: Profil Saya', 'route' => 'profile', 'icon' => 'ri-user-line', 'roles' => ['admin', 'staff', 'doctor']],
         ];
 
         $this->results = collect($menuList)
