@@ -51,7 +51,7 @@
                         <div class="dropdown-divider my-1"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route('profile') }}">
+                        <a class="dropdown-item" wire:navigate href="{{ route('profile') }}">
                             <i class="icon-base ri ri-user-line icon-md me-3"></i>
                             <span>Profil</span>
                         </a>
